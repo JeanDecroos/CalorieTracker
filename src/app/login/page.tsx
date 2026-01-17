@@ -132,6 +132,15 @@ export default function LoginPage() {
               : "Don't have an account? Sign up"}
           </button>
         </div>
+
+        <div className="mt-6 text-center">
+          <a
+            href="/privacy"
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            Privacy Policy
+          </a>
+        </div>
       </div>
     </div>
   )

@@ -605,6 +605,16 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
+
+        {/* Privacy Policy Link */}
+        <div className="mt-8 text-center">
+          <a
+            href="/privacy"
+            className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+          >
+            Privacy Policy
+          </a>
+        </div>
       </main>
     </div>
   )
