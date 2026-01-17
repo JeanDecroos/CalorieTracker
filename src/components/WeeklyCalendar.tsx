@@ -635,7 +635,7 @@ function EditActivityModal({ activity, onClose }: { activity: Activity; onClose:
           activity_name: activityName.trim(),
           calories_burned: caloriesNum,
           duration_minutes: durationNum,
-          calorie_source: caloriesNum !== originalCalories ? 'manual' : activity.calorie_source,
+          calorie_source: caloriesNum !== originalCalories ? 'manual' : (activity.calorie_source as 'strava_provided' | 'estimated' | 'manual' | null) || null,
         },
       })
       onClose()

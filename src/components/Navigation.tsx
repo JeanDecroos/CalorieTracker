@@ -139,7 +139,7 @@ export function Navigation() {
                           onClick={() => setOpenDropdown(null)}
                         />
                         <div className="absolute top-full left-0 mt-2 bg-white rounded-xl border border-slate-200 shadow-lg py-2 min-w-[160px] z-20">
-                          {item.dropdown.map((subItem) => {
+                          {item.dropdown?.map((subItem) => {
                             const SubIcon = subItem.icon
                             const subActive = isSubActive(item, subItem.id)
 

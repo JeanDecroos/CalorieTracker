@@ -116,8 +116,10 @@ export function useAddActivity() {
 }
 
 export interface UpdateActivityInput {
+  activity_name?: string
   calories_burned?: number | null
   duration_minutes?: number | null
+  calorie_source?: 'strava_provided' | 'estimated' | 'manual' | null
 }
 
 export function useUpdateActivity() {

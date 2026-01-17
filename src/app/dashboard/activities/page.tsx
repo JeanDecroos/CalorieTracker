@@ -74,7 +74,7 @@ export default function ActivitiesPage() {
 
   // Calculate statistics
   const totalActivities = activities.length
-  const totalCaloriesBurned = activities.reduce((sum, activity) => sum + activity.calories_burned, 0)
+  const totalCaloriesBurned = activities.reduce((sum, activity) => sum + (activity.calories_burned || 0), 0)
   const totalDuration = activities.reduce((sum, activity) => sum + (activity.duration_minutes || 0), 0)
   const avgCaloriesPerActivity = totalActivities > 0 ? Math.round(totalCaloriesBurned / totalActivities) : 0
 

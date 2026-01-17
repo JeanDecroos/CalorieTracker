@@ -112,10 +112,10 @@ export function useUpdateProfile() {
       }
 
       // Set goal_start_date to today if not already set
-      const updateData: any = {
-        ...goalInput,
-        goal_start_date: goalInput.goal_start_date || new Date().toISOString().split('T')[0],
-      }
+        const updateData: any = {
+          ...goalInput,
+          goal_start_date: (goalInput as any).goal_start_date || new Date().toISOString().split('T')[0],
+        }
 
       // If end_date is provided, calculate duration_weeks if not set
       if (goalInput.goal_end_date && !goalInput.goal_duration_weeks) {

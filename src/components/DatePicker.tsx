@@ -213,7 +213,7 @@ export function DatePicker({ value, onChange, min, required, id, className, plac
             <button
               type="button"
               onClick={goToToday}
-              disabled={minDate && new Date() < minDate}
+              disabled={minDate ? new Date() < minDate : false}
               className="w-full py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               Today
