@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Configure secrets scanning to ignore intentionally public keys
+# NEXT_PUBLIC_* variables are bundled into client-side code by design
+# These Supabase keys are public and work with Row Level Security (RLS) policies
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_SUPABASE_URL"
