@@ -421,8 +421,8 @@ Return ONLY a valid JSON array with exactly ${items.length} objects. No markdown
             const keyWords = parsedName.split(' ').filter((w: string) => w.length > 3)
             const inputWords = inputLower.split(/\s+/).filter((w: string) => w.length > 2)
             
-            const hasMatch = keyWords.some(kw => 
-              inputWords.some(iw => iw.includes(kw) || kw.includes(iw))
+            const hasMatch = keyWords.some((kw: string) => 
+              inputWords.some((iw: string) => iw.includes(kw) || kw.includes(iw))
             ) || inputLower.includes(parsedName) || parsedName.includes(inputLower.split(' ')[0])
             
             if (hasMatch) {
