@@ -24,6 +24,7 @@ export default function SettingsPage() {
   const [endDate, setEndDate] = useState('')
   const [age, setAge] = useState('')
   const [weightKg, setWeightKg] = useState('')
+  const [heightCm, setHeightCm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Strava connection state
@@ -53,6 +54,7 @@ export default function SettingsPage() {
       setGoalUnit(profile.goal_unit || 'per_day')
       setAge(profile.age?.toString() || '')
       setWeightKg(profile.weight_kg?.toString() || '')
+      setHeightCm(profile.height_cm?.toString() || '')
       
       if (profile.goal_duration_weeks) {
         setDurationMethod('weeks')
@@ -271,24 +273,24 @@ export default function SettingsPage() {
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Profile Information</h2>
             <p className="text-slate-600 text-sm">
-              Age and weight are used for calorie estimation when syncing Strava activities.
+              Height, weight, and age are used for accurate calorie estimation when syncing activities.
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="age" className="text-sm font-semibold text-slate-600 mb-1.5 block">
-                  Age (years)
+                <label htmlFor="height" className="text-sm font-semibold text-slate-600 mb-1.5 block">
+                  Height (cm)
                 </label>
                 <input
-                  id="age"
+                  id="height"
                   type="number"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
                   placeholder="Optional"
-                  min="1"
-                  max="150"
+                  min="50"
+                  max="250"
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all tabular-nums"
                 />
               </div>
@@ -309,6 +311,22 @@ export default function SettingsPage() {
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all tabular-nums"
                 />
               </div>
+
+              <div>
+                <label htmlFor="age" className="text-sm font-semibold text-slate-600 mb-1.5 block">
+                  Age (years)
+                </label>
+                <input
+                  id="age"
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  placeholder="Optional"
+                  min="1"
+                  max="150"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all tabular-nums"
+                />
+              </div>
             </div>
 
             <button
@@ -316,8 +334,9 @@ export default function SettingsPage() {
                 setIsSubmitting(true)
                 try {
                   const profileInput: GoalInput = {
-                    age: age ? parseInt(age, 10) : null,
+                    height_cm: heightCm ? parseInt(heightCm, 10) : null,
                     weight_kg: weightKg ? parseFloat(weightKg) : null,
+                    age: age ? parseInt(age, 10) : null,
                   }
                   await updateProfile.mutateAsync(profileInput)
                   alert('Profile information saved successfully!')

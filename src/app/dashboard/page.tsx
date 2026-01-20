@@ -7,8 +7,8 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to default challenge view (week)
-    router.replace('/dashboard/challenge/week')
+    // Redirect to dashboard home
+    router.replace('/dashboard/home')
   }, [router])
 
   return (

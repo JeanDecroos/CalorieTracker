@@ -10,6 +10,7 @@ export interface Activity {
   calories_burned: number | null
   duration_minutes?: number | null
   strava_activity_id?: number | null
+  whoop_workout_id?: number | null
   calorie_source?: string | null
   created_at: string
 }

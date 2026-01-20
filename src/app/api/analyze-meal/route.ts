@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { formatDateForDB } from '@/utils/dateUtils'
 
-const GEMINI_API_KEY = 'AIzaSyDnQrQaAT12xPG4zdT_rOcZqq1j7nasmuY'
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 // Using gemini-2.5-flash (stable model with web search capability)
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+
+if (!GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY environment variable is not set')
+}
 
 export const maxDuration = 30
 
@@ -100,6 +104,13 @@ interface NutritionItem {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: 'GEMINI_API_KEY environment variable is not configured' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const { mealType, items } = body
 
@@ -224,6 +235,8 @@ Return ONLY a valid JSON array with exactly ${items.length} objects. No markdown
         // Try to parse error JSON
         let errorMessage = `Gemini API returned status ${response.status}`
         let retryAfter: number | null = null
+        let isOverloaded = false
+        let isQuotaError = false
         
         try {
           const errorData = JSON.parse(errorText)
@@ -235,23 +248,40 @@ Return ONLY a valid JSON array with exactly ${items.length} objects. No markdown
             retryAfter = Math.ceil(parseFloat(retryMatch[1]))
           }
           
+          // Check if it's an overloaded/rate limit error
+          isOverloaded = errorMessage.toLowerCase().includes('overloaded') || 
+                        errorMessage.toLowerCase().includes('try again later') ||
+                        errorData.error?.code === 429 ||
+                        response.status === 429 ||
+                        errorMessage.toLowerCase().includes('resource exhausted')
+          
           // Check if it's a quota error
-          if (errorData.error?.code === 429 || errorMessage.includes('quota') || errorMessage.includes('Quota exceeded')) {
-            const quotaError: any = new Error(
+          isQuotaError = errorData.error?.code === 429 || 
+                        errorMessage.toLowerCase().includes('quota') || 
+                        errorMessage.toLowerCase().includes('quota exceeded')
+          
+          if (isOverloaded || isQuotaError) {
+            const rateLimitError: any = new Error(
               retryAfter 
-                ? `API quota exceeded. Please wait ${retryAfter} seconds and try again.`
-                : 'API quota exceeded. Please check your Google AI Studio quota or try again later.'
+                ? `The AI model is currently overloaded. Please wait ${retryAfter} seconds and try again.`
+                : 'The AI model is currently overloaded. Please try again in a few moments.'
             )
-            quotaError.code = 'QUOTA_EXCEEDED'
-            quotaError.retryAfter = retryAfter
-            throw quotaError
+            rateLimitError.code = 'RATE_LIMIT_EXCEEDED'
+            rateLimitError.retryAfter = retryAfter || 60 // Default to 60 seconds if no retry time specified
+            throw rateLimitError
           }
         } catch (parseError) {
-          // If parsing failed, check if it's a quota error from text
-          if (errorText.includes('quota') || errorText.includes('Quota exceeded')) {
-            const quotaError: any = new Error('API quota exceeded. Please check your Google AI Studio quota.')
-            quotaError.code = 'QUOTA_EXCEEDED'
-            throw quotaError
+          // If parsing failed, check error text directly
+          const errorTextLower = errorText.toLowerCase()
+          if (errorTextLower.includes('overloaded') || 
+              errorTextLower.includes('try again later') ||
+              errorTextLower.includes('quota') || 
+              errorTextLower.includes('quota exceeded') ||
+              response.status === 429) {
+            const rateLimitError: any = new Error('The AI model is currently overloaded. Please try again in a few moments.')
+            rateLimitError.code = 'RATE_LIMIT_EXCEEDED'
+            rateLimitError.retryAfter = 60
+            throw rateLimitError
           }
         }
         
@@ -532,13 +562,26 @@ Return ONLY a valid JSON array with exactly ${items.length} objects. No markdown
   } catch (error: any) {
     console.error('Meal analysis error:', error)
     
-    // Handle quota errors with appropriate status code
-    if (error.code === 'QUOTA_EXCEEDED') {
+    // Handle rate limit/overloaded errors with appropriate status code
+    if (error.code === 'QUOTA_EXCEEDED' || error.code === 'RATE_LIMIT_EXCEEDED') {
       return NextResponse.json(
         {
-          error: error.message,
-          code: 'QUOTA_EXCEEDED',
-          retryAfter: error.retryAfter,
+          error: error.message || 'The AI model is currently overloaded. Please try again in a few moments.',
+          code: error.code,
+          retryAfter: error.retryAfter || 60,
+        },
+        { status: 429 }
+      )
+    }
+    
+    // Handle overloaded errors even if they don't have a specific code
+    if (error.message?.toLowerCase().includes('overloaded') || 
+        error.message?.toLowerCase().includes('try again later')) {
+      return NextResponse.json(
+        {
+          error: 'The AI model is currently overloaded. Please try again in a few moments.',
+          code: 'RATE_LIMIT_EXCEEDED',
+          retryAfter: 60,
         },
         { status: 429 }
       )

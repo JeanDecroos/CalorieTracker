@@ -48,9 +48,14 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Redirect authenticated users from login to home
+    // Redirect authenticated users from home to Dashboard Home
+    if (user && request.nextUrl.pathname === '/') {
+      return NextResponse.redirect(new URL('/dashboard/home', request.url))
+    }
+
+    // Redirect authenticated users from login to Dashboard Home
     if (user && request.nextUrl.pathname === '/login') {
-      return NextResponse.redirect(new URL('/', request.url))
+      return NextResponse.redirect(new URL('/dashboard/home', request.url))
     }
 
     // Protect dashboard routes (if still used)
