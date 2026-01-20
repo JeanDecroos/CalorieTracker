@@ -2,13 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { formatDateForDB } from '@/utils/dateUtils'
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 // Using gemini-2.5-flash (stable model with web search capability)
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
-
-if (!GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY environment variable is not set')
-}
 
 export const maxDuration = 30
 
@@ -104,6 +99,7 @@ interface NutritionItem {
 
 export async function POST(request: NextRequest) {
   try {
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY
     if (!GEMINI_API_KEY) {
       return NextResponse.json(
         { error: 'GEMINI_API_KEY environment variable is not configured' },
